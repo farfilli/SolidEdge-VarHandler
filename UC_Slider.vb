@@ -12,9 +12,11 @@ Public Class UC_Slider
 
     Dim VarName As String = ""
 
-    Dim min As Integer = 0
-    Dim max As Integer = 0
-
+    'Dim min As Integer = 0
+    'Dim max As Integer = 0
+    Dim min As Double = 0
+    Dim max As Double = 0
+    Dim StepWidth As Double
     Dim steps As Integer = 20
     Dim TrackbarStep As Integer
 
@@ -65,21 +67,28 @@ Public Class UC_Slider
         maxV = CadToValue(maxV, UnitType, LengthUnits)
         minV = CadToValue(minV, UnitType, LengthUnits)
 
-        Try
-            If CInt(maxV) <> 0 Or CInt(minV) <> 0 Then
-                max = CInt(maxV)
-                min = CInt(minV)
-            End If
-        Catch ex As Exception
-            max = 0
-            min = 0
-        End Try
+        'Try
+        '    If CInt(maxV) <> 0 Or CInt(minV) <> 0 Then
+        '        max = CInt(maxV)
+        '        min = CInt(minV)
+        '    End If
+        'Catch ex As Exception
+        '    max = 0
+        '    min = 0
+        'End Try
+
+        max = maxV
+        min = minV
 
 
         If min = 0 And max = 0 Then
-            min = CInt(CadToValue(objVar.Value, UnitType, LengthUnits)) - 10
-            max = CInt(CadToValue(objVar.Value, UnitType, LengthUnits)) + 10
+            'min = CInt(CadToValue(objVar.Value, UnitType, LengthUnits)) - 10
+            'max = CInt(CadToValue(objVar.Value, UnitType, LengthUnits)) + 10
+            min = CadToValue(objVar.Value, UnitType, LengthUnits) - 10
+            max = CadToValue(objVar.Value, UnitType, LengthUnits) + 10
         End If
+
+        StepWidth = (max - min) / steps
 
         If objVar.IsReadOnly Or objVar.Formula <> "" Then
 
@@ -110,10 +119,12 @@ Public Class UC_Slider
 
     Private Sub SetTrackBar()
 
-        TrackBar.Minimum = min
-        TrackBar.Maximum = max
+        'TrackBar.Minimum = min
+        'TrackBar.Maximum = max
+        TrackBar.Minimum = 0
+        TrackBar.Maximum = 100
 
-        TrackbarStep = CInt((max - min) / steps)
+        TrackbarStep = Math.Round((TrackBar.Maximum - TrackBar.Minimum) / steps)
         TrackBar.TickFrequency = TrackbarStep 'CInt((max - min) / steps)
 
         TrackBar.SmallChange = TrackBar.TickFrequency ' / 5
@@ -123,17 +134,22 @@ Public Class UC_Slider
         If Not ViewOnly Then LB_min.Text = min.ToString
         LB_max.Text = max.ToString
 
-        If CadToValue(objVar.Value, UnitType, LengthUnits) < TrackBar.Minimum Then
-            TrackBar.Value = TrackBar.Minimum
-            objVar.Value = ValueToCad(TrackBar.Value, UnitType, LengthUnits)
-        ElseIf CadToValue(objVar.Value, UnitType, LengthUnits) > TrackBar.Maximum Then
-            TrackBar.Value = TrackBar.Maximum
-            objVar.Value = ValueToCad(TrackBar.Value, UnitType, LengthUnits)
-        Else
-            TrackBar.Value = CInt(CadToValue(objVar.Value, UnitType, LengthUnits))
-        End If
+        'If CadToValue(objVar.Value, UnitType, LengthUnits) < TrackBar.Minimum Then
+        '    TrackBar.Value = TrackBar.Minimum
+        '    objVar.Value = ValueToCad(TrackBar.Value, UnitType, LengthUnits)
+        'ElseIf CadToValue(objVar.Value, UnitType, LengthUnits) > TrackBar.Maximum Then
+        '    TrackBar.Value = TrackBar.Maximum
+        '    objVar.Value = ValueToCad(TrackBar.Value, UnitType, LengthUnits)
+        'Else
+        '    TrackBar.Value = CInt(CadToValue(objVar.Value, UnitType, LengthUnits))
+        'End If
 
-        LB_value.Text = CadToValue(objVar.Value, UnitType, LengthUnits).ToString  'TrackBar.Value.ToString
+        Dim tmpValue As Double = CadToValue(objVar.Value, UnitType, LengthUnits)
+        Dim Percentile = (tmpValue - min) / (max - min)
+        TrackBar.Value = Math.Round((TrackBar.Maximum - TrackBar.Minimum) * Percentile + TrackBar.Minimum)
+
+
+        LB_value.Text = tmpValue.ToString  'TrackBar.Value.ToString
 
         LB_name.Text = objVar.Name
 
@@ -158,9 +174,11 @@ Public Class UC_Slider
     Private Sub TrackBar_Scroll(sender As Object, e As EventArgs) Handles TrackBar.Scroll
 
         Try
+            Dim Percentile = (TrackBar.Value - TrackBar.Minimum) / (TrackBar.Maximum - TrackBar.Minimum)
+            objVar.Value = ValueToCad((max - min) * Percentile + min, UnitType, LengthUnits)
 
-            objVar.Value = ValueToCad(TrackBar.Value, UnitType, LengthUnits)
-            LB_value.Text = TrackBar.Value.ToString
+            'objVar.Value = ValueToCad(TrackBar.Value, UnitType, LengthUnits)
+            LB_value.Text = CadToValue(objVar.Value, UnitType, LengthUnits).ToString
             UpdateLabel()
 
         Catch ex As Exception
@@ -190,7 +208,8 @@ Public Class UC_Slider
     Private Sub LB_min_Click(sender As Object, e As EventArgs) Handles LB_min.Click
 
         Try
-            min = CInt(InputBox("Minimum value"))
+            'min = CInt(InputBox("Minimum value"))
+            min = InputBox("Minimum value")
         Catch ex As Exception
             Exit Sub
         End Try
@@ -205,7 +224,8 @@ Public Class UC_Slider
     Private Sub LB_max_Click(sender As Object, e As EventArgs) Handles LB_max.Click
 
         Try
-            max = CInt(InputBox("Maximum value"))
+            'max = CInt(InputBox("Maximum value"))
+            max = InputBox("Maximum value")
         Catch ex As Exception
             Exit Sub
         End Try
@@ -336,7 +356,8 @@ Public Class UC_Slider
             BG_Play.WorkerSupportsCancellation = True
             BG_Play.WorkerReportsProgress = True
 
-            BG_Play.RunWorkerAsync(TrackBar.Value)
+            'BG_Play.RunWorkerAsync(TrackBar.Value)
+            BG_Play.RunWorkerAsync(CadToValue(objVar.Value, UnitType, LengthUnits))
 
             For Each item As Object In Me.Parent.Controls
 
@@ -390,38 +411,75 @@ Public Class UC_Slider
 
     End Function
 
+    Private Function CloseEnough(This As Double, That As Double, Threshold As Double) As Boolean
+        Dim Result As Boolean = True
+
+        If This = 0 And That = 0 Then Return True
+
+        If Not This = 0 Then
+            Result = Math.Abs(Threshold) > Math.Abs((This - That) / This)
+        Else
+            Result = Math.Abs(Threshold) > Math.Abs((This - That) / That)
+        End If
+
+        Return Result
+    End Function
+
     Private Sub BG_Play_DoWork(sender As Object, e As DoWorkEventArgs) Handles BG_Play.DoWork
 
-        Dim ProgressValue As Integer = CInt(e.Argument)
+        'Dim ProgressValue As Integer = CInt(e.Argument)
+        Dim ProgressValue As Double = e.Argument
 
         ExportSteps = New List(Of Object) From {
             GenerateStep()
         }
 
+        Dim Idx As Integer = 0
+
         Do 'Until ProgressValue = max
+
+            ' Process the initial state
+            If Idx = 0 Then
+                If UpdateDoc Then DoUpdateDoc(objDoc)
+
+                If SaveImages Then DoSaveImage(objDoc)
+
+                If CheckInterference Then If Not DoCheckInterference(objDoc) Then Return
+            End If
 
             If Forward Then
 
-                If ProgressValue + TrackbarStep >= max Then
+                'If ProgressValue + TrackbarStep >= max Then
+                '    ProgressValue = max
+                'Else
+                '    ProgressValue += TrackbarStep
+                'End If
+
+                If CloseEnough(ProgressValue + StepWidth, max, Threshold:=0.001) Then
                     ProgressValue = max
                 Else
-                    ProgressValue += TrackbarStep
+                    ProgressValue += StepWidth
                 End If
-
             Else
+                'If ProgressValue - TrackbarStep <= min Then
+                '    ProgressValue = min
+                'Else
+                '    ProgressValue -= TrackbarStep
+                'End If
 
-                If ProgressValue - TrackbarStep <= min Then
+                If CloseEnough(ProgressValue - StepWidth, min, Threshold:=0.001) Then
                     ProgressValue = min
                 Else
-                    ProgressValue -= TrackbarStep
+                    ProgressValue -= StepWidth
                 End If
-
             End If
 
             objVar.Value = ValueToCad(ProgressValue, UnitType, LengthUnits)
 
 
-            If objDoc.Type = SolidEdgeConstants.DocumentTypeConstants.igAssemblyDocument And UpdateDoc Then objDoc.UpdateDocument 'objDoc.Parent.StartCommand(11292)
+            'If objDoc.Type = SolidEdgeConstants.DocumentTypeConstants.igAssemblyDocument And UpdateDoc Then objDoc.UpdateDocument 'objDoc.Parent.StartCommand(11292)
+
+            If UpdateDoc Then DoUpdateDoc(objDoc)
 
             If SaveImages Then DoSaveImage(objDoc)
 
@@ -437,7 +495,7 @@ Public Class UC_Slider
 
 
 
-            BG_Play.ReportProgress((ProgressValue - min / max - min) * 100, ProgressValue.ToString)
+            BG_Play.ReportProgress(((ProgressValue - min) / (max - min)) * 100, ProgressValue.ToString)
 
             If BG_Play.CancellationPending Then
 
@@ -462,6 +520,7 @@ Public Class UC_Slider
 
             End If
 
+            Idx += 1
         Loop
 
     End Sub
@@ -687,7 +746,10 @@ Public Class UC_Slider
 
     Private Sub BG_Play_ProgressChanged(sender As Object, e As ProgressChangedEventArgs) Handles BG_Play.ProgressChanged
 
-        TrackBar.Value = CInt(e.UserState)
+        'TrackBar.Value = CInt(e.UserState)
+        Dim tmpValue = CDbl(e.UserState)
+        Dim Percentile As Double = (tmpValue - min) / (max - min)
+        TrackBar.Value = Math.Round((TrackBar.Maximum - TrackBar.Minimum) * Percentile - TrackBar.Minimum)
 
         'LB_value.Text = "" <--- questo causa l'evento nel form principale che scatena l'aggiornamento di tutti gli Slider e rende l'interfaccia non responsiva.
 
@@ -711,23 +773,23 @@ Public Class UC_Slider
 
 
 
-    Public Function GetMin() As Integer
+    'Public Function GetMin() As Integer
 
-        Return min
+    '    Return min
 
-    End Function
+    'End Function
 
-    Public Function GetMax() As Integer
+    'Public Function GetMax() As Integer
 
-        Return max
+    '    Return max
 
-    End Function
+    'End Function
 
-    Public Function GetSteps() As Integer
+    'Public Function GetSteps() As Integer
 
-        Return steps
+    '    Return steps
 
-    End Function
+    'End Function
 
     Private Sub BT_Loop_Click(sender As Object, e As EventArgs) Handles BT_Loop.Click
 
@@ -751,17 +813,34 @@ Public Class UC_Slider
 
         If objVar.IsReadOnly Or objVar.Formula <> "" Then Return
 
+        'Try
+        '    TrackBar.Value = InputBox("Set current value",, LB_value.Text)
+        'Catch ex As Exception
+        '    Exit Sub
+        'End Try
+
+        'objVar.Value = ValueToCad(TrackBar.Value, UnitType, LengthUnits)
+
+        'LB_value.Text = TrackBar.Value.ToString
+
+        'UpdateLabel()
+
         Try
-            TrackBar.Value = InputBox("Set current value",, LB_value.Text)
+            Dim tmpValue As Double = CDbl(InputBox("Set current value",, LB_value.Text))
+
+            objVar.Value = ValueToCad(tmpValue, UnitType, LengthUnits)
+
+            Dim Percentile As Double = (tmpValue - min) / (max - min)
+
+            TrackBar.Value = Math.Round((TrackBar.Maximum - TrackBar.Minimum) * Percentile - TrackBar.Minimum)
+
+            LB_value.Text = tmpValue.ToString
+
+            UpdateLabel()
         Catch ex As Exception
             Exit Sub
         End Try
 
-        objVar.Value = ValueToCad(TrackBar.Value, UnitType, LengthUnits)
-
-        LB_value.Text = TrackBar.Value.ToString
-
-        UpdateLabel()
 
     End Sub
 
@@ -787,6 +866,7 @@ Public Class UC_Slider
 
         Try
             steps = InputBox("Set number of steps",, steps)
+            StepWidth = (max - min) / steps
         Catch ex As Exception
             Exit Sub
         End Try
@@ -805,6 +885,15 @@ Public Class UC_Slider
 
         BT_Play.Enabled = True
 
+    End Sub
+
+    Public Shared Sub DoUpdateDoc(_objDoc As SolidEdgeFramework.SolidEdgeDocument)
+        If Not _objDoc.Type = SolidEdgeConstants.DocumentTypeConstants.igAssemblyDocument Then
+            ' Nothing to do here
+            Return
+        End If
+
+        CType(_objDoc, SolidEdgeAssembly.AssemblyDocument).UpdateDocument()
     End Sub
 
     Public Shared Sub DoSaveImage(_objDoc As SolidEdgeFramework.SolidEdgeDocument)

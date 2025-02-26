@@ -134,7 +134,10 @@ Public Class Form_WorkFlow
                     Next
 
                     Form_VarHandler.objDoc.Parent.DelayCompute = False
-                    If Form_VarHandler.objDoc.Type = SolidEdgeConstants.DocumentTypeConstants.igAssemblyDocument And UpdateDoc Then Form_VarHandler.objDoc.UpdateDocument
+
+                    'If Form_VarHandler.objDoc.Type = SolidEdgeConstants.DocumentTypeConstants.igAssemblyDocument And UpdateDoc Then Form_VarHandler.objDoc.UpdateDocument
+
+                    If UpdateDoc Then UC_Slider.DoUpdateDoc(Form_VarHandler.objDoc)
 
                     Form_VarHandler.objDoc.Parent.DoIdle()
 
