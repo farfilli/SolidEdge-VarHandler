@@ -158,6 +158,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Form_SelectVariable.resx">
       <DependentUpon>Form_SelectVariable.vb</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Form_VarHandler.resx">
       <DependentUpon>Form_VarHandler.vb</DependentUpon>

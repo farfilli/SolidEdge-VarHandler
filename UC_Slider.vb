@@ -159,6 +159,8 @@ Public Class UC_Slider
 
 
         Dim Percentile = (tmpValue - min) / (max - min)
+        If Percentile > 1 Then Percentile = 1
+        If Percentile < 0 Then Percentile = 0
         TrackBar.Value = Math.Round((TrackBar.Maximum - TrackBar.Minimum) * Percentile + TrackBar.Minimum)
 
 

@@ -33,7 +33,12 @@ Public Class Form_WorkFlow
 
     End Sub
 
-    Private Function NewEvent() As UC_WorkFlowEvent
+    Private Function BuildVariableList(UU As UtilsUnits) As List(Of EventVariable)
+
+        ' Queries the current value of every eligible variable from Solid Edge, once.
+        ' Callers that need this repeatedly (eg. once per workflow event on file load)
+        ' should call this a single time and clone the result instead of calling it
+        ' again, since each call is a round-trip to Solid Edge per variable.
 
         Dim list = New List(Of EventVariable)
         For Each tmpVar In Variables
@@ -42,7 +47,6 @@ Public Class Form_WorkFlow
             If Not (tmpVar.IsReadOnly Or tmpVar.Formula <> "") Then
                 'tmpVariable.Value = Math.Round(UC_Slider.CadToValue(tmpVar.value, tmpVar.UnitsType, LengthUnits), 2)
                 If NewWay Then
-                    Dim UU As New UtilsUnits(Form_VarHandler.ObjDoc)
                     Dim tmpValue As Double = UU.GetVarValue(tmpVar)
 
                     tmpVariable = New EventVariable With {
@@ -64,6 +68,37 @@ Public Class Form_WorkFlow
             End If
 
         Next
+
+        Return list
+
+    End Function
+
+    Private Function CloneVariableList(BaseList As List(Of EventVariable)) As List(Of EventVariable)
+
+        Dim list = New List(Of EventVariable)
+        For Each v In BaseList
+            list.Add(New EventVariable With {
+                .Check = v.Check,
+                .Name = v.Name,
+                .Value = v.Value,
+                .ObjVar = v.ObjVar
+            })
+        Next
+
+        Return list
+
+    End Function
+
+    Private Function NewEvent(Optional BaseList As List(Of EventVariable) = Nothing) As UC_WorkFlowEvent
+
+        Dim list As List(Of EventVariable)
+
+        If BaseList Is Nothing Then
+            Dim UU As New UtilsUnits(Form_VarHandler.ObjDoc)
+            list = BuildVariableList(UU)
+        Else
+            list = CloneVariableList(BaseList)
+        End If
 
         Dim bindingList = New BindingList(Of EventVariable)(list)
         Dim source = New BindingSource(bindingList, Nothing)
@@ -490,6 +525,13 @@ Public Class Form_WorkFlow
             Dim prg = My.Computer.FileSystem.ReadAllText(Filename)
             Dim righe = prg.Replace(vbCrLf, vbCr).Split(vbCrLf)
 
+            ' Query each variable's current value from Solid Edge once, up front,
+            ' rather than once per event. The document isn't modified during load,
+            ' so the value would be identical every time - re-querying it per event
+            ' was the main cause of slow loads on large files.
+            Dim OpenUU As New UtilsUnits(Form_VarHandler.ObjDoc)
+            Dim BaseVariableList = BuildVariableList(OpenUU)
+
             FLP_Events.SuspendLayout()
 
             For i = 0 To righe.Count - 1
@@ -499,7 +541,7 @@ Public Class Form_WorkFlow
 
                 If righe(i).Trim = "" Then Continue For
 
-                Dim tmpStep = NewEvent()
+                Dim tmpStep = NewEvent(BaseVariableList)
 
                 FLP_Events.Controls.Add(tmpStep)
 
