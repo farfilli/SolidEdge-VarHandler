@@ -215,28 +215,42 @@ Public Class Form_WorkFlow
         Dim StepCount As Integer = 1
         Dim s As String
 
+        ' A variable's limit metadata (whether it has one, and its min/max) doesn't
+        ' change from event to event, so query it from Solid Edge once per variable
+        ' name and cache it here instead of re-querying it for every event - same
+        ' O(events x variables) COM round-trip problem fixed in the CSV load path.
+        Dim LimitCache As New Dictionary(Of String, VarLimit)
+
         If FLP_Events.Controls.Count > 0 Then
             For Each StepEvent As UC_WorkFlowEvent In FLP_Events.Controls
 
                 For Each tmpRow As DataGridViewRow In StepEvent.DG_Variables.Rows
 
                     Dim tmpVariable As Object = tmpRow.Cells("objVar").Value
+                    Dim tmpName As String = tmpRow.Cells("Name").Value
 
-                    If UU.HasVariableLimit(tmpVariable) Then
-                        Dim tmpName As String = tmpRow.Cells("Name").Value
+                    Dim Limit As VarLimit = Nothing
+                    If Not LimitCache.TryGetValue(tmpName, Limit) Then
+                        Limit = New VarLimit With {.HasLimit = UU.HasVariableLimit(tmpVariable)}
+                        If Limit.HasLimit Then
+                            Limit.Min = UU.GetValueRangeLowValue(tmpVariable)
+                            Limit.Max = UU.GetValueRangeHighValue(tmpVariable)
+                        End If
+                        LimitCache(tmpName) = Limit
+                    End If
+
+                    If Limit.HasLimit Then
 
                         LabelStatus.Text = String.Format("Checking variable '{0}'", tmpName)
 
                         Dim tmpValue As Double = tmpRow.Cells("Value").Value
-                        Dim tmpMin As Double = UU.GetValueRangeLowValue(tmpVariable)
-                        Dim tmpMax As Double = UU.GetValueRangeHighValue(tmpVariable)
-                        If tmpValue < tmpMin Then
+                        If tmpValue < Limit.Min Then
                             Success = False
-                            s = String.Format("Event {0}: {1}: Value {2} < minimum limit {3}", StepCount, tmpName, tmpValue, tmpMin)
+                            s = String.Format("Event {0}: {1}: Value {2} < minimum limit {3}", StepCount, tmpName, tmpValue, Limit.Min)
                             ErrorList.Add(s)
-                        ElseIf tmpValue > tmpMax Then
+                        ElseIf tmpValue > Limit.Max Then
                             Success = False
-                            s = String.Format("Event {0}: {1} Value {2} > maximum limit {3}", StepCount, tmpName, tmpValue, tmpMax)
+                            s = String.Format("Event {0}: {1} Value {2} > maximum limit {3}", StepCount, tmpName, tmpValue, Limit.Max)
                             ErrorList.Add(s)
                         End If
 
@@ -815,5 +829,13 @@ Public Class EventVariable
     Public Property Name As String = ""
     Public Property Value As Double = 0
     Public Property ObjVar As Object
+
+End Class
+
+Public Class VarLimit
+
+    Public Property HasLimit As Boolean = False
+    Public Property Min As Double = 0
+    Public Property Max As Double = 0
 
 End Class
