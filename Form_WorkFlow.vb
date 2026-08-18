@@ -33,7 +33,12 @@ Public Class Form_WorkFlow
 
     End Sub
 
-    Private Function NewEvent() As UC_WorkFlowEvent
+    Private Function BuildVariableList(UU As UtilsUnits) As List(Of EventVariable)
+
+        ' Queries the current value of every eligible variable from Solid Edge, once.
+        ' Callers that need this repeatedly (eg. once per workflow event on file load)
+        ' should call this a single time and clone the result instead of calling it
+        ' again, since each call is a round-trip to Solid Edge per variable.
 
         Dim list = New List(Of EventVariable)
         For Each tmpVar In Variables
@@ -42,7 +47,6 @@ Public Class Form_WorkFlow
             If Not (tmpVar.IsReadOnly Or tmpVar.Formula <> "") Then
                 'tmpVariable.Value = Math.Round(UC_Slider.CadToValue(tmpVar.value, tmpVar.UnitsType, LengthUnits), 2)
                 If NewWay Then
-                    Dim UU As New UtilsUnits(Form_VarHandler.ObjDoc)
                     Dim tmpValue As Double = UU.GetVarValue(tmpVar)
 
                     tmpVariable = New EventVariable With {
@@ -64,6 +68,37 @@ Public Class Form_WorkFlow
             End If
 
         Next
+
+        Return list
+
+    End Function
+
+    Private Function CloneVariableList(BaseList As List(Of EventVariable)) As List(Of EventVariable)
+
+        Dim list = New List(Of EventVariable)
+        For Each v In BaseList
+            list.Add(New EventVariable With {
+                .Check = v.Check,
+                .Name = v.Name,
+                .Value = v.Value,
+                .ObjVar = v.ObjVar
+            })
+        Next
+
+        Return list
+
+    End Function
+
+    Private Function NewEvent(Optional BaseList As List(Of EventVariable) = Nothing) As UC_WorkFlowEvent
+
+        Dim list As List(Of EventVariable)
+
+        If BaseList Is Nothing Then
+            Dim UU As New UtilsUnits(Form_VarHandler.ObjDoc)
+            list = BuildVariableList(UU)
+        Else
+            list = CloneVariableList(BaseList)
+        End If
 
         Dim bindingList = New BindingList(Of EventVariable)(list)
         Dim source = New BindingSource(bindingList, Nothing)
@@ -137,7 +172,8 @@ Public Class Form_WorkFlow
 
     Private Sub DoUpdateExports(
         ExportList As List(Of String),
-        StepEvent As UC_WorkFlowEvent)
+        StepEvent As UC_WorkFlowEvent,
+        UU As UtilsUnits)
 
         ' ExportList format
         ' Event, Var1, Var2, ...
@@ -161,7 +197,6 @@ Public Class Form_WorkFlow
             Dim tmpVariable As Object = tmpRow.Cells("objVar").Value
 
             If NewWay Then
-                Dim UU As New UtilsUnits(Form_VarHandler.ObjDoc)
                 Dim tmpValue As Double = UU.GetVarValue(tmpVariable)
                 RowString = String.Format("{0},{1}", RowString, CStr(tmpValue))
             Else
@@ -180,28 +215,42 @@ Public Class Form_WorkFlow
         Dim StepCount As Integer = 1
         Dim s As String
 
+        ' A variable's limit metadata (whether it has one, and its min/max) doesn't
+        ' change from event to event, so query it from Solid Edge once per variable
+        ' name and cache it here instead of re-querying it for every event - same
+        ' O(events x variables) COM round-trip problem fixed in the CSV load path.
+        Dim LimitCache As New Dictionary(Of String, VarLimit)
+
         If FLP_Events.Controls.Count > 0 Then
             For Each StepEvent As UC_WorkFlowEvent In FLP_Events.Controls
 
                 For Each tmpRow As DataGridViewRow In StepEvent.DG_Variables.Rows
 
                     Dim tmpVariable As Object = tmpRow.Cells("objVar").Value
+                    Dim tmpName As String = tmpRow.Cells("Name").Value
 
-                    If UU.HasVariableLimit(tmpVariable) Then
-                        Dim tmpName As String = tmpRow.Cells("Name").Value
+                    Dim Limit As VarLimit = Nothing
+                    If Not LimitCache.TryGetValue(tmpName, Limit) Then
+                        Limit = New VarLimit With {.HasLimit = UU.HasVariableLimit(tmpVariable)}
+                        If Limit.HasLimit Then
+                            Limit.Min = UU.GetValueRangeLowValue(tmpVariable)
+                            Limit.Max = UU.GetValueRangeHighValue(tmpVariable)
+                        End If
+                        LimitCache(tmpName) = Limit
+                    End If
+
+                    If Limit.HasLimit Then
 
                         LabelStatus.Text = String.Format("Checking variable '{0}'", tmpName)
 
                         Dim tmpValue As Double = tmpRow.Cells("Value").Value
-                        Dim tmpMin As Double = UU.GetValueRangeLowValue(tmpVariable)
-                        Dim tmpMax As Double = UU.GetValueRangeHighValue(tmpVariable)
-                        If tmpValue < tmpMin Then
+                        If tmpValue < Limit.Min Then
                             Success = False
-                            s = String.Format("Event {0}: {1}: Value {2} < minimum limit {3}", StepCount, tmpName, tmpValue, tmpMin)
+                            s = String.Format("Event {0}: {1}: Value {2} < minimum limit {3}", StepCount, tmpName, tmpValue, Limit.Min)
                             ErrorList.Add(s)
-                        ElseIf tmpValue > tmpMax Then
+                        ElseIf tmpValue > Limit.Max Then
                             Success = False
-                            s = String.Format("Event {0}: {1} Value {2} > maximum limit {3}", StepCount, tmpName, tmpValue, tmpMax)
+                            s = String.Format("Event {0}: {1} Value {2} > maximum limit {3}", StepCount, tmpName, tmpValue, Limit.Max)
                             ErrorList.Add(s)
                         End If
 
@@ -267,7 +316,7 @@ Public Class Form_WorkFlow
 
                 StepEvent.LB_SEQ.ForeColor = Color.DarkGreen
 
-                SetSteps(StepEvent)
+                SetSteps(StepEvent, UU)
 
                 For j = 1 To StepEvent.steps
 
@@ -317,7 +366,7 @@ Public Class Form_WorkFlow
                             End If
                         End If
 
-                        If Export Then DoUpdateExports(ExportList, StepEvent)
+                        If Export Then DoUpdateExports(ExportList, StepEvent, UU)
 
                     End If
 
@@ -358,7 +407,7 @@ Public Class Form_WorkFlow
                         End If
                     End If
 
-                    If Export Then DoUpdateExports(ExportList, StepEvent)
+                    If Export Then DoUpdateExports(ExportList, StepEvent, UU)
 
                 Next
 
@@ -390,7 +439,7 @@ Public Class Form_WorkFlow
 
     End Sub
 
-    Private Sub SetSteps(stepEvent As UC_WorkFlowEvent)
+    Private Sub SetSteps(stepEvent As UC_WorkFlowEvent, UU As UtilsUnits)
 
         Dim tmpSteps = stepEvent.steps
 
@@ -401,7 +450,6 @@ Public Class Form_WorkFlow
             Dim tmpValue As Double
 
             If NewWay Then
-                Dim UU As New UtilsUnits(Form_VarHandler.ObjDoc)
                 tmpValue = UU.GetVarValue(tmpVariable)
                 stepValue = (CDbl(tmpRow.Cells("Value").Value) - tmpValue) / tmpSteps
             Else
@@ -490,6 +538,13 @@ Public Class Form_WorkFlow
             Dim prg = My.Computer.FileSystem.ReadAllText(Filename)
             Dim righe = prg.Replace(vbCrLf, vbCr).Split(vbCrLf)
 
+            ' Query each variable's current value from Solid Edge once, up front,
+            ' rather than once per event. The document isn't modified during load,
+            ' so the value would be identical every time - re-querying it per event
+            ' was the main cause of slow loads on large files.
+            Dim OpenUU As New UtilsUnits(Form_VarHandler.ObjDoc)
+            Dim BaseVariableList = BuildVariableList(OpenUU)
+
             FLP_Events.SuspendLayout()
 
             For i = 0 To righe.Count - 1
@@ -499,7 +554,7 @@ Public Class Form_WorkFlow
 
                 If righe(i).Trim = "" Then Continue For
 
-                Dim tmpStep = NewEvent()
+                Dim tmpStep = NewEvent(BaseVariableList)
 
                 FLP_Events.Controls.Add(tmpStep)
 
@@ -773,5 +828,13 @@ Public Class EventVariable
     Public Property Name As String = ""
     Public Property Value As Double = 0
     Public Property ObjVar As Object
+
+End Class
+
+Public Class VarLimit
+
+    Public Property HasLimit As Boolean = False
+    Public Property Min As Double = 0
+    Public Property Max As Double = 0
 
 End Class

@@ -126,11 +126,11 @@ Public Class UC_Slider
 
         End If
 
-        SetTrackBar()
+        SetTrackBar(UU)
 
     End Sub
 
-    Public Sub SetTrackBar()
+    Public Sub SetTrackBar(Optional UU As UtilsUnits = Nothing)
 
         TrackBar.Minimum = 0
         TrackBar.Maximum = 100
@@ -150,7 +150,11 @@ Public Class UC_Slider
 
 
         If NewWay Then
-            Dim UU As New UtilsUnits(ObjDoc)
+            ' Reuse a caller-supplied UtilsUnits when available - its constructor
+            ' does a COM round-trip to enumerate the document's units, so building
+            ' a fresh one per slider (eg. when refreshing every slider after the
+            ' WorkFlow dialog closes) is wasteful when the document hasn't changed.
+            If UU Is Nothing Then UU = New UtilsUnits(ObjDoc)
             tmpValue = UU.GetVarValue(objVar)
         Else
             tmpValue = CadToValue(objVar.Value, UnitType, LengthUnits)
@@ -159,7 +163,12 @@ Public Class UC_Slider
 
 
         Dim Percentile = (tmpValue - min) / (max - min)
-        TrackBar.Value = Math.Round((TrackBar.Maximum - TrackBar.Minimum) * Percentile + TrackBar.Minimum)
+        If Percentile > 1 Then Percentile = 1
+        If Percentile < 0 Then Percentile = 0
+        Try
+            TrackBar.Value = Math.Round((TrackBar.Maximum - TrackBar.Minimum) * Percentile + TrackBar.Minimum)
+        Catch ex As Exception
+        End Try
 
 
         LB_value.Text = tmpValue.ToString  'TrackBar.Value.ToString
@@ -207,10 +216,15 @@ Public Class UC_Slider
 
     End Sub
 
-    Public Sub UpdateLabel()
+    Public Sub UpdateLabel(Optional UU As UtilsUnits = Nothing)
 
         If NewWay Then
-            Dim UU As New UtilsUnits(ObjDoc)
+            ' Reuse a caller-supplied UtilsUnits when available - see the note in
+            ' SetTrackBar. This matters a lot here: UpdateLabel is called for every
+            ' slider whenever any single slider's value changes (Form_VarHandler.
+            ' Slider_Click), so building a fresh UtilsUnits per call was previously
+            ' O(sliders) COM unit-enumerations on every trackbar scroll tick.
+            If UU Is Nothing Then UU = New UtilsUnits(ObjDoc)
             Dim tmpValue As Double = UU.GetVarValue(objVar)
 
             LB_value.Text = tmpValue.ToString
@@ -532,6 +546,7 @@ Public Class UC_Slider
 
         Dim ProgressValue As Double = e.Argument
         Dim tf As Boolean
+        Dim UU As New UtilsUnits(ObjDoc)
 
         ExportSteps = New List(Of Object) From {
             GenerateStep()
@@ -587,7 +602,6 @@ Public Class UC_Slider
             End If
 
             If NewWay Then
-                Dim UU As New UtilsUnits(ObjDoc)
                 UU.SetVarValue(objVar, ProgressValue)
             Else
                 objVar.Value = ValueToCad(ProgressValue, UnitType, LengthUnits)
@@ -855,6 +869,7 @@ Public Class UC_Slider
     Private Sub Trace(Trace2D As Boolean, ClosedCurve As Boolean)
 
         Dim tmpList As New List(Of Double)
+        Dim UU As New UtilsUnits(ObjDoc)
 
         For Each item In ExportSteps
 
@@ -864,7 +879,6 @@ Public Class UC_Slider
 
                     Case = "Tracker X", "Tracker Y", "Tracker Z"
                         If NewWay Then
-                            Dim UU As New UtilsUnits(ObjDoc)
                             tmpList.Add(UU.ValueToCad(stepItem.Valore, SolidEdgeFramework.UnitTypeConstants.igUnitDistance))
                         Else
                             tmpList.Add(ValueToCad(stepItem.Valore, SolidEdgeFramework.UnitTypeConstants.igUnitDistance, LengthUnits))
