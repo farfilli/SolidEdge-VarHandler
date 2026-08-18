@@ -61,9 +61,13 @@ Public Class Form_VarHandler
 
     Private Sub Slider_Click(sender As Object, e As EventArgs)
 
+        ' Fires on every slider's LB_value.TextChanged, so this runs repeatedly
+        ' while dragging any single slider - reuse one UtilsUnits across all of
+        ' them instead of letting each UpdateLabel() call build its own.
+        Dim UU As New UtilsUnits(ObjDoc)
         For Each tmpSlider As Object In FLP_Vars.Controls
 
-            tmpSlider.UpdateLabel()
+            tmpSlider.UpdateLabel(UU)
 
         Next
 
@@ -290,9 +294,13 @@ Public Class Form_VarHandler
         ' TODO: When this dialog returns, the variable values may have changed.  
         ' I think this is screwing up subsequent manual cycling of any UC_Slider.
 
+        ' A single UtilsUnits is reused across every slider here rather than
+        ' letting each SetTrackBar() call build its own - the document's units
+        ' haven't changed, so re-enumerating them per slider was pure overhead.
+        Dim RefreshUU As New UtilsUnits(ObjDoc)
         For Each item As UC_Slider In FLP_Vars.Controls.OfType(Of UC_Slider)
 
-            If Not IsNothing(item) Then item.SetTrackBar()
+            If Not IsNothing(item) Then item.SetTrackBar(RefreshUU)
 
         Next
 

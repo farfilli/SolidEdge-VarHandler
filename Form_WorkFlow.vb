@@ -172,7 +172,8 @@ Public Class Form_WorkFlow
 
     Private Sub DoUpdateExports(
         ExportList As List(Of String),
-        StepEvent As UC_WorkFlowEvent)
+        StepEvent As UC_WorkFlowEvent,
+        UU As UtilsUnits)
 
         ' ExportList format
         ' Event, Var1, Var2, ...
@@ -196,7 +197,6 @@ Public Class Form_WorkFlow
             Dim tmpVariable As Object = tmpRow.Cells("objVar").Value
 
             If NewWay Then
-                Dim UU As New UtilsUnits(Form_VarHandler.ObjDoc)
                 Dim tmpValue As Double = UU.GetVarValue(tmpVariable)
                 RowString = String.Format("{0},{1}", RowString, CStr(tmpValue))
             Else
@@ -316,7 +316,7 @@ Public Class Form_WorkFlow
 
                 StepEvent.LB_SEQ.ForeColor = Color.DarkGreen
 
-                SetSteps(StepEvent)
+                SetSteps(StepEvent, UU)
 
                 For j = 1 To StepEvent.steps
 
@@ -366,7 +366,7 @@ Public Class Form_WorkFlow
                             End If
                         End If
 
-                        If Export Then DoUpdateExports(ExportList, StepEvent)
+                        If Export Then DoUpdateExports(ExportList, StepEvent, UU)
 
                     End If
 
@@ -407,7 +407,7 @@ Public Class Form_WorkFlow
                         End If
                     End If
 
-                    If Export Then DoUpdateExports(ExportList, StepEvent)
+                    If Export Then DoUpdateExports(ExportList, StepEvent, UU)
 
                 Next
 
@@ -439,7 +439,7 @@ Public Class Form_WorkFlow
 
     End Sub
 
-    Private Sub SetSteps(stepEvent As UC_WorkFlowEvent)
+    Private Sub SetSteps(stepEvent As UC_WorkFlowEvent, UU As UtilsUnits)
 
         Dim tmpSteps = stepEvent.steps
 
@@ -450,7 +450,6 @@ Public Class Form_WorkFlow
             Dim tmpValue As Double
 
             If NewWay Then
-                Dim UU As New UtilsUnits(Form_VarHandler.ObjDoc)
                 tmpValue = UU.GetVarValue(tmpVariable)
                 stepValue = (CDbl(tmpRow.Cells("Value").Value) - tmpValue) / tmpSteps
             Else
