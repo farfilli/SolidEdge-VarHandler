@@ -54,7 +54,7 @@ Partial Class Form_WorkFlow
         Me.FLP_Events.FlowDirection = System.Windows.Forms.FlowDirection.TopDown
         Me.FLP_Events.Location = New System.Drawing.Point(0, 0)
         Me.FLP_Events.Name = "FLP_Events"
-        Me.FLP_Events.Size = New System.Drawing.Size(282, 405)
+        Me.FLP_Events.Size = New System.Drawing.Size(291, 405)
         Me.FLP_Events.TabIndex = 3
         Me.FLP_Events.WrapContents = False
         '
@@ -65,7 +65,7 @@ Partial Class Form_WorkFlow
         Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.BT_Reload, Me.ToolStripSeparator1, Me.BT_Open, Me.BT_Save, Me.BT_Close, Me.ToolStripSeparator2, Me.Add_Event, Me.ToolStripSeparator3, Me.BT_Play, Me.BT_Skip, Me.BT_Step})
         Me.ToolStrip1.Location = New System.Drawing.Point(0, 0)
         Me.ToolStrip1.Name = "ToolStrip1"
-        Me.ToolStrip1.Size = New System.Drawing.Size(284, 25)
+        Me.ToolStrip1.Size = New System.Drawing.Size(293, 25)
         Me.ToolStrip1.TabIndex = 2
         Me.ToolStrip1.Text = "ToolStrip1"
         '
@@ -152,7 +152,7 @@ Partial Class Form_WorkFlow
         Me.BT_Step.Image = Global.SolidEdge_VarHandler.My.Resources.Resources._step
         Me.BT_Step.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.BT_Step.Name = "BT_Step"
-        Me.BT_Step.Size = New System.Drawing.Size(50, 22)
+        Me.BT_Step.Size = New System.Drawing.Size(50, 20)
         Me.BT_Step.Text = "Step"
         '
         'Panel1
@@ -161,7 +161,7 @@ Partial Class Form_WorkFlow
         Me.Panel1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.Panel1.Location = New System.Drawing.Point(0, 25)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(284, 436)
+        Me.Panel1.Size = New System.Drawing.Size(293, 436)
         Me.Panel1.TabIndex = 4
         '
         'Panel2
@@ -170,7 +170,7 @@ Partial Class Form_WorkFlow
         Me.Panel2.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.Panel2.Location = New System.Drawing.Point(0, 431)
         Me.Panel2.Name = "Panel2"
-        Me.Panel2.Size = New System.Drawing.Size(284, 30)
+        Me.Panel2.Size = New System.Drawing.Size(293, 30)
         Me.Panel2.TabIndex = 5
         '
         'LabelStatus
@@ -187,7 +187,7 @@ Partial Class Form_WorkFlow
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(284, 461)
+        Me.ClientSize = New System.Drawing.Size(293, 461)
         Me.Controls.Add(Me.Panel2)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.ToolStrip1)

@@ -516,7 +516,7 @@ Public Class Form_WorkFlow
 
         'tmpFileDialog.Filter = "Text File|*.txt"
         Dim tmpFileDialog As New OpenFileDialog With {
-            .Filter = "Text files|*.txt|CSV files|*.csv",
+            .Filter = "CSV files|*.csv|Text files|*.txt",
             .Title = "Open a Text File"
         }
         tmpFileDialog.ShowDialog()
@@ -549,7 +549,7 @@ Public Class Form_WorkFlow
 
             For i = 0 To righe.Count - 1
 
-                LabelStatus.Text = String.Format("Event {0}", i + 1)
+                LabelStatus.Text = String.Format("Loading event {0}", i + 1)
                 System.Windows.Forms.Application.DoEvents()
 
                 If righe(i).Trim = "" Then Continue For
@@ -619,7 +619,7 @@ Public Class Form_WorkFlow
             Dim Var = InList(0).Trim
             InList.RemoveAt(0)
 
-            LabelStatus.Text = Var
+            LabelStatus.Text = $"Reading variable {Var}"
             System.Windows.Forms.Application.DoEvents()
 
             ' ###### Check for unnamed variables ######
@@ -680,7 +680,7 @@ Public Class Form_WorkFlow
 
             For Each VarName In VarsAndVals.Keys
 
-                LabelStatus.Text = VarName
+                LabelStatus.Text = $"Writing variable {VarName}"
                 System.Windows.Forms.Application.DoEvents()
 
                 If VarName = "Steps" Then Continue For
