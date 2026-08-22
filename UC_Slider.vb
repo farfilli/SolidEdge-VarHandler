@@ -1,7 +1,7 @@
 ﻿Imports System.ComponentModel
 Imports System.IO
-Imports Microsoft.Office.Interop
-Imports Microsoft.Office.Interop.Excel
+'Imports Microsoft.Office.Interop
+'Imports Microsoft.Office.Interop.Excel
 Imports SolidEdgeConstants
 Imports SolidEdgeFramework
 Imports SolidEdgeFrameworkSupport

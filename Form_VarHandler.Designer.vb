@@ -30,7 +30,7 @@ Partial Class Form_VarHandler
         Me.BT_Export = New System.Windows.Forms.ToolStripButton()
         Me.BT_Tracker = New System.Windows.Forms.ToolStripButton()
         Me.ToolStripSeparator3 = New System.Windows.Forms.ToolStripSeparator()
-        Me.BT_Update = New System.Windows.Forms.ToolStripButton()
+        Me.BT_UpdateDoc = New System.Windows.Forms.ToolStripButton()
         Me.BT_SaveImages = New System.Windows.Forms.ToolStripButton()
         Me.BT_CheckInterference = New System.Windows.Forms.ToolStripButton()
         Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
@@ -43,7 +43,7 @@ Partial Class Form_VarHandler
         '
         Me.ToolStrip1.BackColor = System.Drawing.Color.WhiteSmoke
         Me.ToolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden
-        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.BT_Reload, Me.BT_Aggiungi, Me.ToolStripSeparator1, Me.BT_Export, Me.BT_Tracker, Me.ToolStripSeparator3, Me.BT_Update, Me.BT_SaveImages, Me.BT_CheckInterference, Me.ToolStripSeparator2, Me.BT_Workflow})
+        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.BT_Reload, Me.BT_Aggiungi, Me.ToolStripSeparator1, Me.BT_Export, Me.BT_Tracker, Me.ToolStripSeparator3, Me.BT_UpdateDoc, Me.BT_SaveImages, Me.BT_CheckInterference, Me.ToolStripSeparator2, Me.BT_Workflow})
         Me.ToolStrip1.Location = New System.Drawing.Point(0, 0)
         Me.ToolStrip1.Name = "ToolStrip1"
         Me.ToolStrip1.Size = New System.Drawing.Size(335, 25)
@@ -101,14 +101,14 @@ Partial Class Form_VarHandler
         '
         'BT_Update
         '
-        Me.BT_Update.CheckOnClick = True
-        Me.BT_Update.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
-        Me.BT_Update.Image = Global.SolidEdge_VarHandler.My.Resources.Resources.Update
-        Me.BT_Update.ImageTransparentColor = System.Drawing.Color.Magenta
-        Me.BT_Update.Name = "BT_Update"
-        Me.BT_Update.Size = New System.Drawing.Size(23, 22)
-        Me.BT_Update.Text = "Update"
-        Me.BT_Update.ToolTipText = "Update document at each step"
+        Me.BT_UpdateDoc.CheckOnClick = True
+        Me.BT_UpdateDoc.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+        Me.BT_UpdateDoc.Image = Global.SolidEdge_VarHandler.My.Resources.Resources.Update
+        Me.BT_UpdateDoc.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.BT_UpdateDoc.Name = "BT_Update"
+        Me.BT_UpdateDoc.Size = New System.Drawing.Size(23, 22)
+        Me.BT_UpdateDoc.Text = "Update"
+        Me.BT_UpdateDoc.ToolTipText = "Update document at each step"
         '
         'BT_SaveImages
         '
@@ -186,7 +186,7 @@ Partial Class Form_VarHandler
     Friend WithEvents BT_Workflow As ToolStripButton
     Friend WithEvents ToolStripSeparator1 As ToolStripSeparator
     Friend WithEvents BT_Export As ToolStripButton
-    Friend WithEvents BT_Update As ToolStripButton
+    Friend WithEvents BT_UpdateDoc As ToolStripButton
     Friend WithEvents ToolStripSeparator2 As ToolStripSeparator
     Friend WithEvents ToolStripSeparator3 As ToolStripSeparator
     Friend WithEvents BT_SaveImages As ToolStripButton

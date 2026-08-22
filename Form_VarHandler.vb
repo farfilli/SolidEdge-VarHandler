@@ -13,6 +13,49 @@ Public Class Form_VarHandler
     Public Tracking As Boolean = False
     Public Trace As Boolean = False
 
+    Private _UpdateDoc As Boolean
+    Public Property UpdateDoc As Boolean
+        Get
+            Return _UpdateDoc
+        End Get
+        Set(value As Boolean)
+            _UpdateDoc = value
+            If Me.IsHandleCreated Then
+                BT_UpdateDoc.Checked = value
+            End If
+        End Set
+    End Property
+
+    Private _SaveImages As Boolean
+    Public Property SaveImages As Boolean
+        Get
+            Return _SaveImages
+        End Get
+        Set(value As Boolean)
+            _SaveImages = value
+            If Me.IsHandleCreated Then
+                BT_SaveImages.Checked = value
+            End If
+        End Set
+    End Property
+
+    Private _CheckInterference As Boolean
+    Public Property CheckInterference As Boolean
+        Get
+            Return _CheckInterference
+        End Get
+        Set(value As Boolean)
+            _CheckInterference = value
+            If Me.IsHandleCreated Then
+                BT_CheckInterference.Checked = value
+            End If
+        End Set
+    End Property
+
+
+
+
+
     Private Sub BT_Aggiungi_Click(sender As Object, e As EventArgs) Handles BT_Aggiungi.Click
         Dim tmpForm As New Form_SelectVariable With {
             .ObjDoc = ObjDoc,
@@ -31,9 +74,9 @@ Public Class Form_VarHandler
                 '    .CheckInterference = BT_CheckInterference.Checked
                 '}
                 Dim tmpSlider2 As New UC_Slider(item.objVariable, LengthUnits, ObjDoc) With {
-                    .UpdateDoc = BT_Update.Checked,
-                    .SaveImages = BT_SaveImages.Checked,
-                    .CheckInterference = BT_CheckInterference.Checked
+                    .UpdateDoc = Me.UpdateDoc,
+                    .SaveImages = Me.SaveImages,
+                    .CheckInterference = Me.CheckInterference
                 }
 
                 If tmpSlider2.Valid Then
@@ -71,7 +114,7 @@ Public Class Form_VarHandler
 
         Next
 
-        If ObjDoc.Type = DocumentTypeConstants.igAssemblyDocument And BT_Update.Checked Then ObjDoc.UpdateDocument 'objDoc.Parent.StartCommand(11292)
+        If ObjDoc.Type = DocumentTypeConstants.igAssemblyDocument And Me.UpdateDoc Then ObjDoc.UpdateDocument 'objDoc.Parent.StartCommand(11292)
 
     End Sub
 
@@ -131,6 +174,11 @@ Public Class Form_VarHandler
 
         Autotune()
 
+        Dim UP As New UtilsPreferences
+
+        UP.CreatePreferencesDirectory()
+        UP.GetProgramSettings(Me)
+
     End Sub
 
     Private Sub Autotune()
@@ -177,9 +225,9 @@ Public Class Form_VarHandler
                 '    .CheckInterference = BT_CheckInterference.Checked
                 '}
                 Dim tmpSlider As New UC_Slider(item, LengthUnits, ObjDoc) With {
-                    .UpdateDoc = BT_Update.Checked,
-                    .SaveImages = BT_SaveImages.Checked,
-                    .CheckInterference = BT_CheckInterference.Checked
+                    .UpdateDoc = Me.UpdateDoc,
+                    .SaveImages = Me.SaveImages,
+                    .CheckInterference = Me.CheckInterference
                 }
 
                 AddHandler tmpSlider.LB_value.TextChanged, AddressOf Slider_Click
@@ -282,9 +330,9 @@ Public Class Form_VarHandler
 
         Dim tmpWorkFlow As New Form_WorkFlow With {
             .Variables = tmpVariables,
-            .UpdateDoc = BT_Update.Checked,
-            .SaveImages = BT_SaveImages.Checked,
-            .CheckInterference = BT_CheckInterference.Checked,
+            .UpdateDoc = Me.UpdateDoc,
+            .SaveImages = Me.SaveImages,
+            .CheckInterference = Me.CheckInterference,
             .LengthUnits = LengthUnits,
             .Export = BT_Export.Checked
         }
@@ -297,6 +345,9 @@ Public Class Form_VarHandler
         ' A single UtilsUnits is reused across every slider here rather than
         ' letting each SetTrackBar() call build its own - the document's units
         ' haven't changed, so re-enumerating them per slider was pure overhead.
+
+        Me.Cursor = Cursors.WaitCursor
+
         Dim RefreshUU As New UtilsUnits(ObjDoc)
         For Each item As UC_Slider In FLP_Vars.Controls.OfType(Of UC_Slider)
 
@@ -304,32 +355,54 @@ Public Class Form_VarHandler
 
         Next
 
+        Me.Cursor = Cursors.Default
     End Sub
 
-    Private Sub BT_Update_CheckedChanged(sender As Object, e As EventArgs) Handles BT_Update.CheckedChanged
+    Private Sub BT_UpdateDoc_CheckedChanged(sender As Object, e As EventArgs) Handles BT_UpdateDoc.CheckedChanged
+        Me.UpdateDoc = BT_UpdateDoc.Checked
 
         For Each tmpSlider In FLP_Vars.Controls
 
-            If TypeOf tmpSlider Is UC_Slider Then tmpSlider.UpdateDoc = BT_Update.Checked
+            If TypeOf tmpSlider Is UC_Slider Then tmpSlider.UpdateDoc = Me.UpdateDoc
 
         Next
 
     End Sub
 
-    Private Sub BT_SaveImages_Click(sender As Object, e As EventArgs) Handles BT_SaveImages.Click
+    'Private Sub BT_SaveImages_Click(sender As Object, e As EventArgs) Handles BT_SaveImages.Click
+    '    For Each C As Control In FLP_Vars.Controls
+    '        If TypeOf C Is UC_Slider Then
+    '            Dim tmpSlider As UC_Slider = CType(C, UC_Slider)
+    '            tmpSlider.SaveImages = BT_SaveImages.Checked
+    '        End If
+    '    Next
+    'End Sub
+    Private Sub BT_SaveImages_CheckChanged(sender As Object, e As EventArgs) Handles BT_SaveImages.CheckedChanged
+        Me.SaveImages = BT_SaveImages.Checked
+
         For Each C As Control In FLP_Vars.Controls
             If TypeOf C Is UC_Slider Then
                 Dim tmpSlider As UC_Slider = CType(C, UC_Slider)
-                tmpSlider.SaveImages = BT_SaveImages.Checked
+                tmpSlider.SaveImages = Me.SaveImages
             End If
         Next
     End Sub
 
-    Private Sub BT_CheckInterference_Click(sender As Object, e As EventArgs) Handles BT_CheckInterference.Click
+    'Private Sub BT_CheckInterference_Click(sender As Object, e As EventArgs) Handles BT_CheckInterference.Click
+    '    For Each C As Control In FLP_Vars.Controls
+    '        If TypeOf C Is UC_Slider Then
+    '            Dim tmpSlider As UC_Slider = CType(C, UC_Slider)
+    '            tmpSlider.CheckInterference = Me.CheckInterference
+    '        End If
+    '    Next
+    'End Sub
+    Private Sub BT_CheckInterference_CheckChanged(sender As Object, e As EventArgs) Handles BT_CheckInterference.CheckedChanged
+        Me.CheckInterference = BT_CheckInterference.Checked
+
         For Each C As Control In FLP_Vars.Controls
             If TypeOf C Is UC_Slider Then
                 Dim tmpSlider As UC_Slider = CType(C, UC_Slider)
-                tmpSlider.CheckInterference = BT_CheckInterference.Checked
+                tmpSlider.CheckInterference = Me.CheckInterference
             End If
         Next
     End Sub
@@ -350,6 +423,12 @@ Public Class Form_VarHandler
     End Function
 
 
+    Private Sub Form_Closing(sender As Object, e As EventArgs) Handles Me.FormClosing
+        Dim UP As New UtilsPreferences
+
+        UP.SaveProgramSettings(Me)
+
+    End Sub
 
 End Class
 
