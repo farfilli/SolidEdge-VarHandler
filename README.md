@@ -112,6 +112,14 @@ All released versions [<ins>here</ins>](https://github.com/farfilli/SolidEdge-Va
 
 - 0.7 Update document option, Workflows
   
+- 1.0  
+  - All kinds of units supported
+  - Save as image at each step
+  - Check interference at each step
+  - Double-variable values support
+  - WorkFlow csv import\export
+  - WorkFlow Step, Stop, Skip controls
+	
 **Known limits**
 - ~~Only user variables supported~~
 - ~~Supported units are `mm`, `in`, `degree`, `second`, and `scalar`.  Other units will result in a warning.~~
