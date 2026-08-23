@@ -69,6 +69,9 @@
     <Reference Include="DirectShowLib-2005, Version=2.0.0.0, Culture=neutral, PublicKeyToken=67e7b740cdfc2d3f, processorArchitecture=MSIL">
       <HintPath>packages\Splicer.1.1\lib\net45\DirectShowLib-2005.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Splicer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a66524ed949429f4, processorArchitecture=MSIL">
       <HintPath>packages\Splicer.1.1\lib\net45\Splicer.dll</HintPath>
     </Reference>
@@ -153,6 +156,7 @@
     <Compile Include="UC_WorkFlowEvent.vb">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="UtilsPreferences.vb" />
     <Compile Include="UtilsUnits.vb" />
   </ItemGroup>
   <ItemGroup>

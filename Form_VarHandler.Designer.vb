@@ -24,18 +24,18 @@ Partial Class Form_VarHandler
     Private Sub InitializeComponent()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form_VarHandler))
         Me.ToolStrip1 = New System.Windows.Forms.ToolStrip()
-        Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
-        Me.ToolStripSeparator3 = New System.Windows.Forms.ToolStripSeparator()
-        Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
-        Me.FLP_Vars = New System.Windows.Forms.FlowLayoutPanel()
         Me.BT_Reload = New System.Windows.Forms.ToolStripButton()
         Me.BT_Aggiungi = New System.Windows.Forms.ToolStripButton()
+        Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.BT_Export = New System.Windows.Forms.ToolStripButton()
         Me.BT_Tracker = New System.Windows.Forms.ToolStripButton()
-        Me.BT_Update = New System.Windows.Forms.ToolStripButton()
+        Me.ToolStripSeparator3 = New System.Windows.Forms.ToolStripSeparator()
+        Me.BT_UpdateDoc = New System.Windows.Forms.ToolStripButton()
         Me.BT_SaveImages = New System.Windows.Forms.ToolStripButton()
         Me.BT_CheckInterference = New System.Windows.Forms.ToolStripButton()
+        Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
         Me.BT_Workflow = New System.Windows.Forms.ToolStripButton()
+        Me.FLP_Vars = New System.Windows.Forms.FlowLayoutPanel()
         Me.ToolStrip1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -43,39 +43,12 @@ Partial Class Form_VarHandler
         '
         Me.ToolStrip1.BackColor = System.Drawing.Color.WhiteSmoke
         Me.ToolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden
-        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.BT_Reload, Me.BT_Aggiungi, Me.ToolStripSeparator1, Me.BT_Export, Me.BT_Tracker, Me.ToolStripSeparator3, Me.BT_Update, Me.BT_SaveImages, Me.BT_CheckInterference, Me.ToolStripSeparator2, Me.BT_Workflow})
+        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.BT_Reload, Me.BT_Aggiungi, Me.ToolStripSeparator1, Me.BT_Export, Me.BT_Tracker, Me.ToolStripSeparator3, Me.BT_UpdateDoc, Me.BT_SaveImages, Me.BT_CheckInterference, Me.ToolStripSeparator2, Me.BT_Workflow})
         Me.ToolStrip1.Location = New System.Drawing.Point(0, 0)
         Me.ToolStrip1.Name = "ToolStrip1"
         Me.ToolStrip1.Size = New System.Drawing.Size(335, 25)
         Me.ToolStrip1.TabIndex = 0
         Me.ToolStrip1.Text = "ToolStrip1"
-        '
-        'ToolStripSeparator1
-        '
-        Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
-        Me.ToolStripSeparator1.Size = New System.Drawing.Size(6, 25)
-        '
-        'ToolStripSeparator3
-        '
-        Me.ToolStripSeparator3.Name = "ToolStripSeparator3"
-        Me.ToolStripSeparator3.Size = New System.Drawing.Size(6, 25)
-        '
-        'ToolStripSeparator2
-        '
-        Me.ToolStripSeparator2.Name = "ToolStripSeparator2"
-        Me.ToolStripSeparator2.Size = New System.Drawing.Size(6, 25)
-        '
-        'FLP_Vars
-        '
-        Me.FLP_Vars.AutoScroll = True
-        Me.FLP_Vars.BackColor = System.Drawing.Color.White
-        Me.FLP_Vars.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.FLP_Vars.FlowDirection = System.Windows.Forms.FlowDirection.TopDown
-        Me.FLP_Vars.Location = New System.Drawing.Point(0, 25)
-        Me.FLP_Vars.Name = "FLP_Vars"
-        Me.FLP_Vars.Size = New System.Drawing.Size(335, 436)
-        Me.FLP_Vars.TabIndex = 1
-        Me.FLP_Vars.WrapContents = False
         '
         'BT_Reload
         '
@@ -93,6 +66,11 @@ Partial Class Form_VarHandler
         Me.BT_Aggiungi.Name = "BT_Aggiungi"
         Me.BT_Aggiungi.Size = New System.Drawing.Size(93, 22)
         Me.BT_Aggiungi.Text = "Add Variable"
+        '
+        'ToolStripSeparator1
+        '
+        Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
+        Me.ToolStripSeparator1.Size = New System.Drawing.Size(6, 25)
         '
         'BT_Export
         '
@@ -116,16 +94,21 @@ Partial Class Form_VarHandler
         Me.BT_Tracker.Text = "Add Tracker"
         Me.BT_Tracker.ToolTipText = "Adds a tracker that trace a polyline on its movement"
         '
+        'ToolStripSeparator3
+        '
+        Me.ToolStripSeparator3.Name = "ToolStripSeparator3"
+        Me.ToolStripSeparator3.Size = New System.Drawing.Size(6, 25)
+        '
         'BT_Update
         '
-        Me.BT_Update.CheckOnClick = True
-        Me.BT_Update.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
-        Me.BT_Update.Image = Global.SolidEdge_VarHandler.My.Resources.Resources.Update
-        Me.BT_Update.ImageTransparentColor = System.Drawing.Color.Magenta
-        Me.BT_Update.Name = "BT_Update"
-        Me.BT_Update.Size = New System.Drawing.Size(23, 22)
-        Me.BT_Update.Text = "Update"
-        Me.BT_Update.ToolTipText = "Update document at each step"
+        Me.BT_UpdateDoc.CheckOnClick = True
+        Me.BT_UpdateDoc.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+        Me.BT_UpdateDoc.Image = Global.SolidEdge_VarHandler.My.Resources.Resources.Update
+        Me.BT_UpdateDoc.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.BT_UpdateDoc.Name = "BT_Update"
+        Me.BT_UpdateDoc.Size = New System.Drawing.Size(23, 22)
+        Me.BT_UpdateDoc.Text = "Update"
+        Me.BT_UpdateDoc.ToolTipText = "Update document at each step"
         '
         'BT_SaveImages
         '
@@ -149,14 +132,31 @@ Partial Class Form_VarHandler
         Me.BT_CheckInterference.Text = "ToolStripButton2"
         Me.BT_CheckInterference.ToolTipText = "Check interference at each step"
         '
+        'ToolStripSeparator2
+        '
+        Me.ToolStripSeparator2.Name = "ToolStripSeparator2"
+        Me.ToolStripSeparator2.Size = New System.Drawing.Size(6, 25)
+        '
         'BT_Workflow
         '
         Me.BT_Workflow.Image = Global.SolidEdge_VarHandler.My.Resources.Resources.program
         Me.BT_Workflow.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.BT_Workflow.Name = "BT_Workflow"
-        Me.BT_Workflow.Size = New System.Drawing.Size(78, 20)
+        Me.BT_Workflow.Size = New System.Drawing.Size(78, 22)
         Me.BT_Workflow.Text = "Workflow"
         Me.BT_Workflow.ToolTipText = "Execute a sequence of variable changes"
+        '
+        'FLP_Vars
+        '
+        Me.FLP_Vars.AutoScroll = True
+        Me.FLP_Vars.BackColor = System.Drawing.Color.White
+        Me.FLP_Vars.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.FLP_Vars.FlowDirection = System.Windows.Forms.FlowDirection.TopDown
+        Me.FLP_Vars.Location = New System.Drawing.Point(0, 25)
+        Me.FLP_Vars.Name = "FLP_Vars"
+        Me.FLP_Vars.Size = New System.Drawing.Size(335, 436)
+        Me.FLP_Vars.TabIndex = 1
+        Me.FLP_Vars.WrapContents = False
         '
         'Form_VarHandler
         '
@@ -169,7 +169,7 @@ Partial Class Form_VarHandler
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MinimumSize = New System.Drawing.Size(280, 400)
         Me.Name = "Form_VarHandler"
-        Me.Text = "Solid Edge VarHandler v0.7"
+        Me.Text = "Solid Edge VarHandler v1.0"
         Me.TopMost = True
         Me.ToolStrip1.ResumeLayout(False)
         Me.ToolStrip1.PerformLayout()
@@ -186,7 +186,7 @@ Partial Class Form_VarHandler
     Friend WithEvents BT_Workflow As ToolStripButton
     Friend WithEvents ToolStripSeparator1 As ToolStripSeparator
     Friend WithEvents BT_Export As ToolStripButton
-    Friend WithEvents BT_Update As ToolStripButton
+    Friend WithEvents BT_UpdateDoc As ToolStripButton
     Friend WithEvents ToolStripSeparator2 As ToolStripSeparator
     Friend WithEvents ToolStripSeparator3 As ToolStripSeparator
     Friend WithEvents BT_SaveImages As ToolStripButton
