@@ -13,8 +13,44 @@ Public Class Form_WorkFlow
     Public StartEvent As Integer = 1
     Public CurrentEvent As Integer = 1
     Public IsSingleStep As Boolean = False
-    Public ReverseStep As Boolean = False
-    Public Abort As Boolean = False
+    'Public ReverseStep As Boolean = False
+
+    Public RequestPause As Boolean
+    'Private _RequestPause As Boolean
+    'Public Property RequestPause As Boolean
+    '    Get
+    '        Return _RequestPause
+    '    End Get
+    '    Set(value As Boolean)
+    '        _RequestPause = value
+    '        If Me.IsHandleCreated Then
+    '            If _RequestPause Then
+    '                BT_Play.Image = My.Resources.video_pause_pending
+    '            Else
+    '                BT_Play.Image = My.Resources.video_play
+    '            End If
+    '            Windows.Forms.Application.DoEvents()
+    '        End If
+    '    End Set
+    'End Property
+
+    Private _IsPaused As Boolean
+    Public Property IsPaused As Boolean
+        Get
+            Return _IsPaused
+        End Get
+        Set(value As Boolean)
+            _IsPaused = value
+            If Me.IsHandleCreated Then
+                If _IsPaused Then
+                    BT_Play.Image = My.Resources.video_play
+                Else
+                    BT_Play.Image = My.Resources.video_pause
+                End If
+            End If
+        End Set
+    End Property
+
 
     Public NewWay As Boolean = True
 
@@ -276,10 +312,19 @@ Public Class Form_WorkFlow
 
     Private Sub BT_Play_Click(sender As Object, e As EventArgs) Handles BT_Play.Click
 
+        If Not IsPaused And RequestPause Then Exit Sub ' Ignore repeated clicks
+
+        If IsPaused Then
+            IsPaused = False
+        Else
+            RequestPause = True
+            Exit Sub
+        End If
+
         If Not CheckVarLimits() Then Exit Sub
 
-        BT_Skip.Text = "Stop"
-        BT_Skip.Image = My.Resources._Stop
+        'BT_Skip.Text = "Stop"
+        'BT_Skip.Image = My.Resources._Stop
 
         Dim InterferenceMessage As String = ""
         Dim ExportList As List(Of String) = Nothing
@@ -294,124 +339,42 @@ Public Class Form_WorkFlow
 
         If FLP_Events.Controls.Count > 0 Then
 
-            For Each StepEvent As UC_WorkFlowEvent In FLP_Events.Controls
+            If CurrentEvent = FLP_Events.Controls.Count Then CurrentEvent = 1
 
-                Dim StepNumber As Integer = CInt(StepEvent.LB_SEQ.Text)
+            Dim StartIdx As Integer = CurrentEvent - 1
 
-                If IsSingleStep Then
-                    If StepNumber < CurrentEvent Then
-                        Continue For
-                    End If
-                    If StepNumber > CurrentEvent Then
-                        Exit For
-                    End If
-                Else
-                    If StepNumber < StartEvent Then
-                        Continue For
-                    End If
+            Dim EndIdx As Integer
+            If Not IsSingleStep Then
+                EndIdx = FLP_Events.Controls.Count - 1
+            Else
+                StartIdx = CurrentEvent
+                EndIdx = StartIdx
+            End If
+
+            For idx = StartIdx To EndIdx
+                CurrentEvent = idx + 1
+
+                Dim tmpEvent As UC_WorkFlowEvent = FLP_Events.Controls(idx)
+
+                FLP_Events.ScrollControlIntoView(tmpEvent)
+
+                tmpEvent.LB_SEQ.ForeColor = Color.DarkGreen
+
+                SetSteps(tmpEvent, UU)
+
+                ProcessEventSteps(tmpEvent, StartTime, ElapsedTime, EventsCount, InterferenceMessage, ExportList, UU)
+
+                tmpEvent.LB_SEQ.ForeColor = Color.DarkGray
+
+                System.Windows.Forms.Application.DoEvents()
+                If RequestPause Then
+                    'BT_Skip.Text = "Skip"
+                    'BT_Skip.Image = My.Resources.skip
+                    RequestPause = False
+                    IsPaused = True
+                    LabelStatus.Text = "Paused"
+                    Exit Sub
                 End If
-
-
-                FLP_Events.ScrollControlIntoView(StepEvent)
-
-                StepEvent.LB_SEQ.ForeColor = Color.DarkGreen
-
-                SetSteps(StepEvent, UU)
-
-                For j = 1 To StepEvent.steps
-
-                    System.Windows.Forms.Application.DoEvents()
-                    If Abort Then
-                        BT_Skip.Text = "Skip"
-                        BT_Skip.Image = My.Resources.skip
-                        Abort = False
-                        LabelStatus.Text = "Processing aborted by user"
-                        Exit Sub
-                    End If
-
-                    Dim StepsCount As Integer = StepEvent.steps
-
-                    Dim i As Integer = j
-
-                    If ReverseStep Then
-                        i = StepEvent.steps + 1 - j
-                    End If
-
-                    ElapsedTime = Now.Subtract(StartTime).TotalMinutes
-
-                    LabelStatus.Text = String.Format("Event {0}/{1}, Step {2}/{3}, Elapsed {4} min",
-                                           StepEvent.LB_SEQ.Text, EventsCount, i, StepsCount, ElapsedTime.ToString("0.0"))
-
-                    Dim IsFirstStep As Boolean
-
-                    If Not ReverseStep Then
-                        IsFirstStep = (StepEvent.LB_SEQ.Text = "1") And (i = 1)
-                    Else
-                        IsFirstStep = (StepEvent.LB_SEQ.Text = CStr(StepEvent.steps)) And (i = StepEvent.steps)
-                    End If
-
-                    ' Process first step before incrementing variables
-                    If IsFirstStep Then
-                        If UpdateDoc Then UC_Slider.DoUpdateDoc(Form_VarHandler.ObjDoc)
-
-                        Form_VarHandler.ObjDoc.Parent.DoIdle()
-
-                        If SaveImages Then UC_Slider.DoSaveImage(Form_VarHandler.ObjDoc)
-
-                        If CheckInterference Then
-                            If Not UC_Slider.DoCheckInterference(Form_VarHandler.ObjDoc) Then
-                                If InterferenceMessage = "" Then
-                                    InterferenceMessage = String.Format("Interference first detected in Event {0}, Step {1}", StepEvent.LB_SEQ.Text, i)
-                                End If
-                            End If
-                        End If
-
-                        If Export Then DoUpdateExports(ExportList, StepEvent, UU)
-
-                    End If
-
-                    Form_VarHandler.ObjDoc.Parent.DelayCompute = True
-
-                    For Each tmpRow As DataGridViewRow In StepEvent.DG_Variables.Rows
-
-                        Dim tmpVariable As Object = tmpRow.Cells("objVar").Value
-
-                        ' ###### TODO The variable is sometimes getting out of range in SE. ######
-                        ' Need a min/max check somewhere.  Not sure this is the place to do it.
-
-                        If NewWay Then
-                            'tmpVariable.Value += UU.ValueToCad(tmpRow.Tag, tmpVariable.UnitsType)
-                            Dim tmpValue = UU.GetVarValue(tmpVariable) + tmpRow.Tag
-                            UU.SetVarValue(tmpVariable, tmpValue)
-                        Else
-                            tmpVariable.Value += UC_Slider.ValueToCad(tmpRow.Tag, tmpVariable.UnitsType, LengthUnits)
-                        End If
-
-                    Next
-
-                    Form_VarHandler.ObjDoc.Parent.DelayCompute = False
-
-                    'If Form_VarHandler.objDoc.Type = SolidEdgeConstants.DocumentTypeConstants.igAssemblyDocument And UpdateDoc Then Form_VarHandler.objDoc.UpdateDocument
-
-                    If UpdateDoc Then UC_Slider.DoUpdateDoc(Form_VarHandler.ObjDoc)
-
-                    Form_VarHandler.ObjDoc.Parent.DoIdle()
-
-                    If SaveImages Then UC_Slider.DoSaveImage(Form_VarHandler.ObjDoc)
-
-                    If CheckInterference Then
-                        If Not UC_Slider.DoCheckInterference(Form_VarHandler.ObjDoc) Then
-                            If InterferenceMessage = "" Then
-                                InterferenceMessage = String.Format("Interference first detected in Event {0}, Step {1}", StepEvent.LB_SEQ.Text, i)
-                            End If
-                        End If
-                    End If
-
-                    If Export Then DoUpdateExports(ExportList, StepEvent, UU)
-
-                Next
-
-                StepEvent.LB_SEQ.ForeColor = Color.DarkGray
 
             Next
 
@@ -434,8 +397,81 @@ Public Class Form_WorkFlow
 
         End If
 
-        BT_Skip.Text = "Skip"
-        BT_Skip.Image = My.Resources.skip
+        'BT_Skip.Text = "Skip"
+        'BT_Skip.Image = My.Resources.skip
+
+        IsPaused = True
+
+    End Sub
+
+    Private Sub ProcessEventSteps(
+        tmpEvent As UC_WorkFlowEvent,
+        StartTime As DateTime,
+        ByRef ElapsedTime As Double,
+        EventsCount As Integer,
+        ByRef InterferenceMessage As String,
+        ByRef ExportList As List(Of String),
+        UU As UtilsUnits)
+
+        For StepNumber = 1 To tmpEvent.steps
+
+            Dim StepsCount As Integer = tmpEvent.steps
+
+            ElapsedTime = Now.Subtract(StartTime).TotalMinutes
+
+            LabelStatus.Text = $"Event {tmpEvent.LB_SEQ.Text}/{EventsCount}, Step {StepNumber}/{StepsCount}, Elapsed {ElapsedTime.ToString("0.0")} min"
+
+            ' Process first step before incrementing variables
+            Dim IsFirstStep As Boolean = (tmpEvent.LB_SEQ.Text = "1") And (StepNumber = 1)
+            If IsFirstStep Then ProcessEventStepOptionalUpdates(tmpEvent, InterferenceMessage, ExportList, UU, StepNumber)
+
+            Form_VarHandler.ObjDoc.Parent.DelayCompute = True
+
+            For Each tmpRow As DataGridViewRow In tmpEvent.DG_Variables.Rows
+
+                Dim tmpVariable As Object = tmpRow.Cells("objVar").Value
+
+                ' ###### TODO The variable is sometimes getting out of range in SE. ######
+                ' Need a min/max check somewhere.  Not sure this is the place to do it.
+
+                If NewWay Then
+                    Dim tmpValue = UU.GetVarValue(tmpVariable) + tmpRow.Tag
+                    UU.SetVarValue(tmpVariable, tmpValue)
+                Else
+                    tmpVariable.Value += UC_Slider.ValueToCad(tmpRow.Tag, tmpVariable.UnitsType, LengthUnits)
+                End If
+
+            Next
+
+            Form_VarHandler.ObjDoc.Parent.DelayCompute = False
+
+            ProcessEventStepOptionalUpdates(tmpEvent, InterferenceMessage, ExportList, UU, StepNumber)
+        Next
+
+    End Sub
+
+    Private Sub ProcessEventStepOptionalUpdates(
+        tmpEvent As UC_WorkFlowEvent,
+        ByRef InterferenceMessage As String,
+        ByRef ExportList As List(Of String),
+        UU As UtilsUnits,
+        StepNumber As Integer)
+
+        If UpdateDoc Then UC_Slider.DoUpdateDoc(Form_VarHandler.ObjDoc)
+
+        Form_VarHandler.ObjDoc.Parent.DoIdle()
+
+        If SaveImages Then UC_Slider.DoSaveImage(Form_VarHandler.ObjDoc)
+
+        If CheckInterference Then
+            If Not UC_Slider.DoCheckInterference(Form_VarHandler.ObjDoc) Then
+                If InterferenceMessage = "" Then
+                    InterferenceMessage = String.Format("Interference first detected in Event {0}, Step {1}", tmpEvent.LB_SEQ.Text, StepNumber)
+                End If
+            End If
+        End If
+
+        If Export Then DoUpdateExports(ExportList, tmpEvent, UU)
 
     End Sub
 
@@ -734,6 +770,9 @@ Public Class Form_WorkFlow
         '################# Questo risolver il problema del bordo sgrazinato della ToolStrip
         ToolStrip1.Renderer = New MySR()
         '################# rif: https://stackoverflow.com/questions/1918247/how-to-disable-the-line-under-tool-strip-in-winform-c
+
+        IsPaused = True
+        RequestPause = False
     End Sub
 
     Friend Sub ReNumber()
@@ -757,69 +796,51 @@ Public Class Form_WorkFlow
 
     Private Sub BT_Skip_Click(sender As Object, e As EventArgs) Handles BT_Skip.Click
 
-        If Not Abort Then  ' Ignore multiple clicks
-            If BT_Skip.Text = "Skip" Then
-                Dim Result = InputBox("Enter start event number",, StartEvent)
-                If Not Result = "" Then StartEvent = CInt(Result)
-                CurrentEvent = StartEvent
-            Else
-                BT_Skip.Text = "Skip"
-                BT_Skip.Image = My.Resources.skip
-                Abort = True
-            End If
-        End If
+        'If Not RequestPause Then  ' Ignore multiple clicks
+        '    If BT_Skip.Text = "Skip" Then
+        '        Dim Result = InputBox("Enter start event number",, StartEvent)
+        '        If Not Result = "" Then StartEvent = CInt(Result)
+        '        CurrentEvent = StartEvent
+        '    Else
+        '        BT_Skip.Text = "Skip"
+        '        BT_Skip.Image = My.Resources.skip
+        '        RequestPause = True
+        '    End If
+        'End If
+
+        If Not IsPaused Then Exit Sub
+
+        Dim Result = InputBox("Enter start event number",, StartEvent)
+        If Not Result = "" Then StartEvent = CInt(Result)
+        CurrentEvent = StartEvent
+
     End Sub
 
     Private Sub BT_Step_Click(sender As Object, e As EventArgs) Handles BT_Step.Click
 
-        Dim WasPreviousStepReverse As Boolean = ReverseStep
-
-        If ModifierKeys = Keys.Control Then
-            ReverseStep = True
-            If Not WasPreviousStepReverse Then
-                CurrentEvent -= 2
-                If CurrentEvent = 0 Then
-                    CurrentEvent = FLP_Events.Controls.Count
-                ElseIf CurrentEvent = -1 Then
-                    CurrentEvent = FLP_Events.Controls.Count - 1
-                End If
-            End If
-        Else
-            ReverseStep = False
-            If WasPreviousStepReverse Then
-                CurrentEvent += 2
-                If CurrentEvent = FLP_Events.Controls.Count + 1 Then
-                    CurrentEvent = 1
-                ElseIf CurrentEvent = FLP_Events.Controls.Count + 2 Then
-                    CurrentEvent = 2
-                End If
-            End If
-        End If
+        If Not IsPaused Then Exit Sub
 
         IsSingleStep = True
-
         BT_Play.PerformClick()
-
-        If Not ReverseStep Then
-            If CurrentEvent = FLP_Events.Controls.Count Then
-                CurrentEvent = 1
-            Else
-                CurrentEvent += 1
-            End If
-        Else
-            If CurrentEvent = 1 Then
-                CurrentEvent = FLP_Events.Controls.Count
-            Else
-                CurrentEvent -= 1
-            End If
-        End If
-
         IsSingleStep = False
-        'ReverseStep = False
-
+        IsPaused = True
 
     End Sub
 
+    Private Sub BT_Rewind_Click(sender As Object, e As EventArgs) Handles BT_Rewind.Click
+
+        If Not IsPaused Then Exit Sub
+
+        CurrentEvent = 1
+    End Sub
+
+    Private Sub BT_End_Click(sender As Object, e As EventArgs) Handles BT_End.Click
+
+        If Not IsPaused Then Exit Sub
+
+        CurrentEvent = FLP_Events.Controls.Count
+
+    End Sub
 End Class
 
 Public Class EventVariable

@@ -33,9 +33,11 @@ Partial Class Form_WorkFlow
         Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
         Me.Add_Event = New System.Windows.Forms.ToolStripButton()
         Me.ToolStripSeparator3 = New System.Windows.Forms.ToolStripSeparator()
+        Me.BT_Rewind = New System.Windows.Forms.ToolStripButton()
         Me.BT_Play = New System.Windows.Forms.ToolStripButton()
-        Me.BT_Skip = New System.Windows.Forms.ToolStripButton()
+        Me.BT_End = New System.Windows.Forms.ToolStripButton()
         Me.BT_Step = New System.Windows.Forms.ToolStripButton()
+        Me.BT_Skip = New System.Windows.Forms.ToolStripButton()
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.LabelStatus = New System.Windows.Forms.Label()
@@ -54,7 +56,7 @@ Partial Class Form_WorkFlow
         Me.FLP_Events.FlowDirection = System.Windows.Forms.FlowDirection.TopDown
         Me.FLP_Events.Location = New System.Drawing.Point(0, 0)
         Me.FLP_Events.Name = "FLP_Events"
-        Me.FLP_Events.Size = New System.Drawing.Size(291, 405)
+        Me.FLP_Events.Size = New System.Drawing.Size(282, 405)
         Me.FLP_Events.TabIndex = 3
         Me.FLP_Events.WrapContents = False
         '
@@ -62,10 +64,10 @@ Partial Class Form_WorkFlow
         '
         Me.ToolStrip1.BackColor = System.Drawing.Color.WhiteSmoke
         Me.ToolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden
-        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.BT_Reload, Me.ToolStripSeparator1, Me.BT_Open, Me.BT_Save, Me.BT_Close, Me.ToolStripSeparator2, Me.Add_Event, Me.ToolStripSeparator3, Me.BT_Play, Me.BT_Skip, Me.BT_Step})
+        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.BT_Reload, Me.ToolStripSeparator1, Me.BT_Open, Me.BT_Save, Me.BT_Close, Me.ToolStripSeparator2, Me.Add_Event, Me.ToolStripSeparator3, Me.BT_Rewind, Me.BT_Play, Me.BT_End, Me.BT_Step, Me.BT_Skip})
         Me.ToolStrip1.Location = New System.Drawing.Point(0, 0)
         Me.ToolStrip1.Name = "ToolStrip1"
-        Me.ToolStrip1.Size = New System.Drawing.Size(293, 25)
+        Me.ToolStrip1.Size = New System.Drawing.Size(284, 25)
         Me.ToolStrip1.TabIndex = 2
         Me.ToolStrip1.Text = "ToolStrip1"
         '
@@ -130,30 +132,47 @@ Partial Class Form_WorkFlow
         Me.ToolStripSeparator3.Name = "ToolStripSeparator3"
         Me.ToolStripSeparator3.Size = New System.Drawing.Size(6, 25)
         '
+        'BT_Rewind
+        '
+        Me.BT_Rewind.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+        Me.BT_Rewind.Image = Global.SolidEdge_VarHandler.My.Resources.Resources.video_beginning
+        Me.BT_Rewind.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.BT_Rewind.Name = "BT_Rewind"
+        Me.BT_Rewind.Size = New System.Drawing.Size(23, 22)
+        Me.BT_Rewind.ToolTipText = "Go to start"
+        '
         'BT_Play
         '
-        Me.BT_Play.Image = Global.SolidEdge_VarHandler.My.Resources.Resources.Play
+        Me.BT_Play.Image = Global.SolidEdge_VarHandler.My.Resources.Resources.video_play
         Me.BT_Play.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.BT_Play.Name = "BT_Play"
-        Me.BT_Play.Size = New System.Drawing.Size(49, 22)
-        Me.BT_Play.Text = "Play"
+        Me.BT_Play.Size = New System.Drawing.Size(23, 22)
+        Me.BT_Play.ToolTipText = "Play / pause / resume"
+        '
+        'BT_End
+        '
+        Me.BT_End.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+        Me.BT_End.Image = Global.SolidEdge_VarHandler.My.Resources.Resources.video_ending
+        Me.BT_End.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.BT_End.Name = "BT_End"
+        Me.BT_End.Size = New System.Drawing.Size(23, 22)
+        Me.BT_End.ToolTipText = "Go to end"
+        '
+        'BT_Step
+        '
+        Me.BT_Step.Image = Global.SolidEdge_VarHandler.My.Resources.Resources.video_step
+        Me.BT_Step.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.BT_Step.Name = "BT_Step"
+        Me.BT_Step.Size = New System.Drawing.Size(23, 22)
+        Me.BT_Step.ToolTipText = "Single step"
         '
         'BT_Skip
         '
         Me.BT_Skip.Image = Global.SolidEdge_VarHandler.My.Resources.Resources.skip
         Me.BT_Skip.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.BT_Skip.Name = "BT_Skip"
-        Me.BT_Skip.Size = New System.Drawing.Size(49, 22)
-        Me.BT_Skip.Text = "Skip"
-        Me.BT_Skip.ToolTipText = "Skip"
-        '
-        'BT_Step
-        '
-        Me.BT_Step.Image = Global.SolidEdge_VarHandler.My.Resources.Resources._step
-        Me.BT_Step.ImageTransparentColor = System.Drawing.Color.Magenta
-        Me.BT_Step.Name = "BT_Step"
-        Me.BT_Step.Size = New System.Drawing.Size(50, 20)
-        Me.BT_Step.Text = "Step"
+        Me.BT_Skip.Size = New System.Drawing.Size(23, 20)
+        Me.BT_Skip.ToolTipText = "Set start frame"
         '
         'Panel1
         '
@@ -161,7 +180,7 @@ Partial Class Form_WorkFlow
         Me.Panel1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.Panel1.Location = New System.Drawing.Point(0, 25)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(293, 436)
+        Me.Panel1.Size = New System.Drawing.Size(284, 436)
         Me.Panel1.TabIndex = 4
         '
         'Panel2
@@ -170,7 +189,7 @@ Partial Class Form_WorkFlow
         Me.Panel2.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.Panel2.Location = New System.Drawing.Point(0, 431)
         Me.Panel2.Name = "Panel2"
-        Me.Panel2.Size = New System.Drawing.Size(293, 30)
+        Me.Panel2.Size = New System.Drawing.Size(284, 30)
         Me.Panel2.TabIndex = 5
         '
         'LabelStatus
@@ -187,7 +206,7 @@ Partial Class Form_WorkFlow
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(293, 461)
+        Me.ClientSize = New System.Drawing.Size(284, 461)
         Me.Controls.Add(Me.Panel2)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.ToolStrip1)
@@ -224,4 +243,6 @@ Partial Class Form_WorkFlow
     Friend WithEvents LabelStatus As Label
     Friend WithEvents BT_Step As ToolStripButton
     Friend WithEvents BT_Skip As ToolStripButton
+    Friend WithEvents BT_Rewind As ToolStripButton
+    Friend WithEvents BT_End As ToolStripButton
 End Class
