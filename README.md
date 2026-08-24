@@ -72,10 +72,12 @@ The workflow controls are detailed below.
 - ![Save](./Resources/icons8_save_16.png) *Save*.  Saves the current workflow to disk.
 - ![Close](./Resources/icons8_close_window_16.png) *Close*.  Closes the current workflow.
 - ![Add](./Resources/icons8_add_16.png) *Add*.  Adds an event to the current workflow.
-- ![Play](./Resources/icons8_circled_play_16.png) *Play*.  Runs the events from beginning to end.  While playing, the Skip button turns into a Stop button.  Click that to stop play.  Note the current event will proceed to completion.
+- ![Rewind](./Media/video_beginning_16.png) *Go to start*.  Sets the current event to the first event of the workflow.
+- ![Play](./Media/video_play_16.png)/![Play](./Media/video_pause_16.png) *Play/Pause*.  Runs the events from the current event to the end.  While playing, it becomes the Pause button.  Note the current event will finish before pausing playback.
+- ![End](./Media/video_ending_16.png) *Go to end*.  Sets the current event to the last event in the workflow.
+- ![Step](./Media/video_step_16.png) *Step*.  Plays the next event and stops.
 - ![Skip](./Resources/icons8-skip-16.png) *Skip*.  Sets the event number where play starts.
-- ![Step](./Resources/icons8-step-16.png) *Step*.  Plays the next event and stops.  CTRL-Click plays the previous event.
-- ![Settings](./Resources/icons8_settings_16.png)  *Settings*.  Set the number of steps for the event.
+- ![Settings](./Resources/icons8_settings_16.png)  *Settings*.  Set the number of steps for the event.  (This is located on each event panel.  It is a per-event control.)
 
 Format for `*.csv` files
 
@@ -112,14 +114,10 @@ All released versions [<ins>here</ins>](https://github.com/farfilli/SolidEdge-Va
 
 - 0.7 Update document option, Workflows
   
-- 1.0  
-  - All kinds of units supported
-  - Save as image at each step
-  - Check interference at each step
-  - Double-variable values support
-  - WorkFlow csv import\export
-  - WorkFlow Step, Stop, Skip controls
+- 1.0  All unit types supported, save as image and check interference at each step, double-variable values support, workFlow csv import\export, workFlow Step, Stop, Skip controls
 	
+- (Future release)  Save selected program settings between sessions, cache variables to improve workflow load times, improved consistency/reliability of workflow playback controls, added example videos, 
+
 **Known limits**
 - ~~Only user variables supported~~
 - ~~Supported units are `mm`, `in`, `degree`, `second`, and `scalar`.  Other units will result in a warning.~~
@@ -129,6 +127,8 @@ All released versions [<ins>here</ins>](https://github.com/farfilli/SolidEdge-Va
 - A second video in action [<ins>here</ins>](https://youtu.be/izA-oFQAoVA?si=1aqEMtKb33YCjdMl).
 - 2D Tracker tracing a spline [<ins>here</ins>](https://www.youtube.com/watch?v=YH6zwButRlo&ab_channel=FrancescoArfilli).
 - 3D Tracker in assembly [<ins>here</ins>](https://youtu.be/T-k3u4ftC2k?si=VSHl7Id2dQuqqkK0).
+- Fun robot building the Tower of Hanoi [<ins>here</ins>](https://www.youtube.com/shorts/3aFwVJU6RIc)
+- Numerical analysis example [<ins>here</ins>](https://www.youtube.com/watch?v=WG0EQESZJ2A) 
 
 **Example files**
 
